@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cronograma de Auditorias</title>
+<style>
+:root{
+  --bg:#eef1f5;--panel:#ffffff;--ink:#1c2530;--ink-soft:#5b6776;
+  --line:#dfe4ea;--line-soft:#eef1f5;--head:#152232;
+  --t1:#1f7a4d;--t1-soft:#e8f4ec;--t1-soft2:#f3f9f5;
+  --blue:#1c4f8a;--blue-soft2:#f4f8fc;--brown:#8a4a1c;--brown-soft:#f7ece3;
+  --holiday:#f4b400;--shadow:0 1px 2px rgba(20,34,50,.06),0 8px 24px rgba(20,34,50,.08);
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0}
+body{font-family:var(--sans);background:radial-gradient(1200px 500px at 80% -10%,#fff 0%,transparent 60%),var(--bg);color:var(--ink);min-height:100vh;padding:28px 22px 60px}
+.wrap{max-width:1320px;margin:0 auto}
+.topbar{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:0;line-height:1.05;display:flex;align-items:center;gap:12px}
+h1 .dot{width:13px;height:34px;background:var(--t1);border-radius:3px;display:inline-block;transform:skewX(-12deg)}
+.sub{color:var(--ink-soft);font-size:13.5px;margin-top:6px;font-weight:500}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap}
+.btn{font-family:var(--sans);font-weight:600;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:9px 14px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;box-shadow:var(--shadow);transition:.15s}
+.btn:hover{transform:translateY(-1px);border-color:#c7cfd9}
+.btn svg{width:15px;height:15px}
+.btn.primary{background:var(--head);color:#fff;border-color:var(--head)}
+.btn.primary:hover{background:#1f3147}
+.btn.warn{background:#fff;color:var(--brown);border-color:#e7d3c2}
+.controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 16px;margin-bottom:16px;box-shadow:var(--shadow)}
+.tabs{display:flex;gap:6px;background:var(--line-soft);padding:4px;border-radius:10px}
+.tab{border:none;background:transparent;font-family:var(--sans);font-weight:700;font-size:14px;padding:8px 20px;border-radius:7px;cursor:pointer;color:var(--ink-soft);transition:.15s}
+.tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.ctl-spacer{flex:1}
+.field{display:flex;align-items:center;gap:8px}
+.field label{font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+select{font-family:var(--sans);font-weight:600;font-size:13px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 12px;background:#fff;cursor:pointer}
+.hint{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:6px}
+.hint .key{font-family:var(--mono);font-size:11px;background:var(--line-soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.tablecard{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.scroller{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1180px}
+thead .grp th{font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#fff;padding:9px 8px;text-align:center;border-right:2px solid rgba(255,255,255,.18)}
+.grp .g-dia{background:var(--head)}.grp .g-t1{background:var(--t1)}.grp .g-week{background:var(--blue)}.grp .g-month{background:var(--brown)}
+thead .sub th{font-size:11.5px;font-weight:700;color:var(--ink);background:#f6f8fa;padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);border-right:1px solid var(--line-soft);white-space:nowrap}
+thead .sub th.center{text-align:center}
+tbody td{font-size:13px;border-bottom:1px solid var(--line-soft);border-right:1px solid var(--line-soft);vertical-align:top;padding:0}
+.cell{padding:9px 11px;min-height:38px;white-space:pre-wrap;line-height:1.45;outline:none;cursor:text}
+.cell:focus{background:#fff6da;box-shadow:inset 0 0 0 2px var(--holiday)}
+.cell:empty::before{content:"—";color:#c4ccd6}
+td.col-dia{background:var(--head);color:#fff;text-align:center;vertical-align:middle;width:54px;position:relative}
+td.col-dia .num{font-size:18px;font-weight:800;font-family:var(--mono)}
+td.col-sem{background:#f6f8fa;text-align:center;vertical-align:middle;font-weight:700;font-size:12px;color:var(--ink-soft);width:54px}
+td.t1-a{background:var(--t1-soft2)}td.t1-b{background:#fff}
+td.daily-out{background:var(--t1-soft);text-align:center;font-weight:600}
+td.week{background:var(--blue-soft2);text-align:center;font-weight:600}
+td.month{background:var(--brown-soft);text-align:center;font-weight:600}
+.daily-out .cell,.week .cell,.month .cell{text-align:center}
+tr.holiday td.col-dia{box-shadow:inset 4px 0 0 var(--holiday)}
+.hol-tag{display:block;font-size:8.5px;font-weight:800;background:var(--holiday);color:#3a2a00;border-radius:4px;padding:2px 3px;margin:4px 2px 0;line-height:1.1;cursor:pointer}
+.hol-add{display:block;font-size:9px;color:rgba(255,255,255,.5);margin-top:4px;cursor:pointer}
+.hol-add:hover{color:#fff}
+tr.weekend td.col-sem{color:#b06}
+tr.weekend td.daily-out,tr.weekend td.week,tr.weekend td.month{opacity:.55}
+.cell.dim{opacity:.18}.cell.match{background:#fff3c2}.cell.match:focus{background:#fff6da}
+.foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-top:14px;font-size:12px;color:var(--ink-soft)}
+.legend{display:flex;gap:16px;flex-wrap:wrap}.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:13px;height:13px;border-radius:3px;display:inline-block}
+.saved{font-family:var(--mono);font-size:11px}
+@media print{body{background:#fff;padding:0}.topbar .toolbar,.controls{display:none!important}.tablecard{box-shadow:none;border:none}.foot{display:none}table{min-width:0;font-size:10px}.cell{padding:4px 6px}thead{display:table-header-group}tr{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1><span class="dot"></span>Cronograma de Auditorias</h1>
+      <div class="sub" id="subtitle">Junho 2026 · clique em qualquer célula para editar</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="addRow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Linha</button>
+      <button class="btn" id="exportBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>Exportar</button>
+      <button class="btn" id="importBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 21h14"/></svg>Importar</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none">
+      <button class="btn warn" id="resetBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8"/><path d="M3 4v4h4"/></svg>Restaurar</button>
+      <button class="btn primary" id="pdfBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>PDF / Imprimir</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="tabs">
+      <button class="tab active" data-turn="T1">Turno T1</button>
+      <button class="tab" data-turn="T2">Turno T2</button>
+    </div>
+    <div class="ctl-spacer"></div>
+    <div class="field">
+      <label for="personFilter">Filtrar por pessoa</label>
+      <select id="personFilter"><option value="">Todos</option></select>
+    </div>
+    <div class="hint">Status <span class="key" id="savedTime">—</span></div>
+  </div>
+
+  <div class="tablecard">
+    <div class="scroller">
+      <table id="grid">
+        <thead>
+          <tr class="grp">
+            <th class="g-dia" rowspan="2">Dia</th>
+            <th class="g-dia" rowspan="2">Sem</th>
+            <th class="g-t1" colspan="5">Auditorias Diárias (Seg–Sex)</th>
+            <th class="g-week" colspan="4">Auditorias Semanais</th>
+            <th class="g-month" colspan="1">Mensal</th>
+          </tr>
+          <tr class="sub">
+            <th>Caça Lost 1 Busca</th><th>Caça Lost Revisão</th>
+            <th class="center">MU OUT</th><th class="center">Aplicação Found</th><th class="center">Saídas Rezagos</th>
+            <th class="center">MU Inbound</th><th class="center">HU Inbound</th><th class="center">HU Outbound</th><th class="center">Shipping TMWH</th>
+            <th class="center">Gaylords Rezagos</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="legend">
+      <span><i class="sw" style="background:var(--t1)"></i>Diárias</span>
+      <span><i class="sw" style="background:var(--blue)"></i>Semanais</span>
+      <span><i class="sw" style="background:var(--brown)"></i>Mensal</span>
+      <span><i class="sw" style="background:var(--holiday)"></i>Feriado (clique no nº do dia)</span>
+    </div>
+    <div class="saved" id="footSave"></div>
+  </div>
+</div>
+
+<script>
+var COLS = ["busca","revisao","muout","found","saidas","muin","huin","huout","shipping","gaylords"];
+var WEEKDAY = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+
+function seed(){
+  function mk(dia,sem,vals,opt){
+    var o = {dia:dia,sem:sem};
+    if(opt && opt.holiday) o.holiday = opt.holiday;
+    COLS.forEach(function(c,i){ o[c] = vals[i] || ""; });
+    return o;
+  }
+  var T1 = [
+    mk(1,"Seg",["Kaua\nLuana","Hellen\nLucas A.","Grazielli","Hellen","Kaua","","","","",""]),
+    mk(2,"Ter",["Grazielli\nLuana","Hellen\nLucas A.","Kaua","Lucas A.","Grazielli","","","","",""]),
+    mk(3,"Qua",["Gabriela\nNicollas\nGab. Lobo","Hellen\nLucas A.\nJose Alex\nVera","Luana","Jose Alex","Gabriela","Grazielli","","Kaua","",""]),
+    mk(4,"Qui",["Luana\nNicollas\nGab. Lobo","Hellen\nLucas A.\nJose Alex\nVera","Gabriela","Vera","Luana","","Grazielli","","Kaua",""],{holiday:"Corpus Christi"}),
+    mk(5,"Sex",["Gabriela\nGab. Lobo","Jose Alex\nVera","Nicollas","Jose Alex","Gab. Lobo","","","","",""]),
+    mk(6,"Sáb",["Gabriela\nNicollas\nGab. Lobo","Jose Alex\nVera","","","","","","","",""]),
+    mk(7,"Dom",["Grazielli\nKaua\nLuana","Hellen\nLucas A.","","","","","","","",""])
+  ];
+  var T2 = [
+    mk(1,"Seg",["Equipe T2","Revisão T2","—","—","—","","","","",""]),
+    mk(2,"Ter",["Equipe T2","Revisão T2","—","—","—","","","","",""])
+  ];
+  return {T1:T1,T2:T2};
+}
+
+/* ===== Camada de persistência — preparada para a API do Grid =====
+   Quando tiver o endpoint, defina enabled:true e url. Sem isso,
+   funciona em memória + Exportar/Importar JSON. */
+var GRID_API = { enabled:false, url:"" };
+
+function gridSave(state){
+  if(!GRID_API.enabled) return Promise.resolve(false);
+  return fetch(GRID_API.url,{method:"PUT",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify(state)})
+    .then(function(r){return r.ok;}).catch(function(){return false;});
+}
+function gridLoad(){
+  if(!GRID_API.enabled) return Promise.resolve(null);
+  return fetch(GRID_API.url,{credentials:"include"})
+    .then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+}
+
+var data = seed();
+var currentTurn = "T1";
+
+function setStatus(msg){
+  document.getElementById('savedTime').textContent = msg;
+  document.getElementById('footSave').textContent = msg ? ("• "+msg) : "";
+}
+function persist(){
+  gridSave(data).then(function(ok){
+    var t = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    setStatus(GRID_API.enabled ? (ok ? "salvo "+t : "falha ao salvar") : "edição local "+t);
+  });
+}
+
+function render(){
+  var tbody = document.getElementById('tbody');
+  tbody.innerHTML = "";
+  data[currentTurn].forEach(function(row,ri){
+    var tr = document.createElement('tr');
+    var isWeekend = row.sem==="Sáb"||row.sem==="Dom";
+    if(row.holiday) tr.classList.add('holiday');
+    if(isWeekend) tr.classList.add('weekend');
+
+    var tdDia = document.createElement('td');
+    tdDia.className='col-dia';
+    var holHtml = row.holiday
+      ? '<span class="hol-tag" title="Clique para remover">'+row.holiday+'</span>'
+      : '<span class="hol-add" title="Marcar feriado">+ feriado</span>';
+    tdDia.innerHTML = '<span class="num">'+row.dia+'</span>'+holHtml;
+    tdDia.querySelector('.hol-tag, .hol-add').onclick = function(){ toggleHoliday(ri); };
+    tr.appendChild(tdDia);
+
+    var tdSem = document.createElement('td');
+    tdSem.className='col-sem';
+    tdSem.textContent = row.sem;
+    tr.appendChild(tdSem);
+
+    COLS.forEach(function(col,ci){
+      var td = document.createElement('td');
+      if(ci<2) td.className = ci===0 ? 't1-a' : 't1-b';
+      else if(ci<5) td.className = 'daily-out';
+      else if(ci<9) td.className = 'week';
+      else td.className = 'month';
+      var cell = document.createElement('div');
+      cell.className='cell';
+      cell.contentEditable = "true";
+      cell.spellcheck = false;
+      cell.textContent = row[col] || "";
+      // FIX 1: atualiza o modelo sem trim() durante digitação para
+      // preservar newlines intermediárias (múltiplos nomes por célula)
+      cell.addEventListener('input', function(){ row[col] = cell.innerText; });
+      cell.addEventListener('blur', function(){
+        // trim apenas ao sair da célula
+        row[col] = cell.innerText.trim();
+        cell.textContent = row[col];
+        persist();
+        buildPersonList();
+        applyFilter();
+      });
+      td.appendChild(cell);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  applyFilter();
+}
+
+function toggleHoliday(ri){
+  var row = data[currentTurn][ri];
+  if(row.holiday){ delete row.holiday; }
+  else{
+    var name = prompt("Nome do feriado:", "Feriado");
+    if(name===null) return;
+    row.holiday = name.trim() || "Feriado";
+  }
+  persist(); render();
+}
+
+document.getElementById('addRow').onclick = function(){
+  var rows = data[currentTurn];
+  var newDia = (rows.length ? Number(rows[rows.length-1].dia) : 0)+1;
+  // FIX 2: limitar ao mês de junho (30 dias); além disso usar
+  // dia clampeado para calcular o dia da semana corretamente
+  var diaSem = Math.min(newDia, 30);
+  var sem = WEEKDAY[new Date(2026, 5, diaSem).getDay()] || "—";
+  var obj = {dia:newDia, sem:sem};
+  COLS.forEach(function(c){ obj[c]=""; });
+  rows.push(obj);
+  persist(); render();
+};
+
+document.getElementById('resetBtn').onclick = function(){
+  if(confirm("Restaurar dados originais? Suas edições serão perdidas.")){
+    data = seed(); persist(); buildPersonList(); render();
+  }
+};
+
+document.getElementById('pdfBtn').onclick = function(){ window.print(); };
+
+document.getElementById('exportBtn').onclick = function(){
+  var blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = "cronograma-auditorias.json";
+  a.click();
+  // FIX 3: revogar após o evento de clique ser processado pelo navegador
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+};
+document.getElementById('importBtn').onclick = function(){ document.getElementById('importFile').click(); };
+document.getElementById('importFile').onchange = function(e){
+  var file = e.target.files[0]; if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var obj = JSON.parse(reader.result);
+      if(obj.T1 && obj.T2){ data = obj; persist(); buildPersonList(); render(); setStatus("importado"); }
+      else alert("Arquivo inválido: faltam T1/T2.");
+    }catch(err){ alert("Não foi possível ler o JSON."); }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+};
+
+var tabs = document.querySelectorAll('.tab');
+tabs.forEach(function(t){
+  t.onclick = function(){
+    tabs.forEach(function(x){ x.classList.remove('active'); });
+    t.classList.add('active');
+    currentTurn = t.dataset.turn;
+    document.getElementById('subtitle').textContent =
+      "Junho 2026 · "+t.textContent+" · clique em qualquer célula para editar";
+    render();
+  };
+});
+
+function buildPersonList(){
+  var set = {};
+  ["T1","T2"].forEach(function(turn){
+    data[turn].forEach(function(row){
+      COLS.forEach(function(c){
+        (row[c]||"").split("\n").forEach(function(n){
+          var name=n.trim(); if(name && name!=="—") set[name]=true;
+        });
+      });
+    });
+  });
+  var sel = document.getElementById('personFilter');
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">Todos</option>';
+  Object.keys(set).sort(function(a,b){return a.localeCompare(b,'pt-BR');}).forEach(function(n){
+    var o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o);
+  });
+  if(set[cur]) sel.value=cur;
+}
+function applyFilter(){
+  var term = document.getElementById('personFilter').value.trim().toLowerCase();
+  document.querySelectorAll('.cell').forEach(function(cell){
+    cell.classList.remove('dim','match');
+    if(!term) return;
+    if(cell.innerText.toLowerCase().indexOf(term)>=0) cell.classList.add('match');
+    else cell.classList.add('dim');
+  });
+}
+document.getElementById('personFilter').onchange = applyFilter;
+
+(function(){
+  gridLoad().then(function(remote){
+    if(remote && remote.T1 && remote.T2){ data = remote; setStatus("carregado do Grid"); }
+    else setStatus(GRID_API.enabled ? "novo (sem dados salvos)" : "modo local");
+    buildPersonList();
+    render();
+  });
+})();
+</script>
+</body>
+</html>
