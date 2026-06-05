@@ -327,8 +327,10 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 }
 .btn-generate:hover { opacity: .9; transform: translateY(-1px); }
 .btn-generate:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-.gemini-results { margin-top: 18px; display: none; }
+.gemini-results { margin-top: 18px; display: none; max-height: 320px; overflow-y: auto; }
 .gemini-results.show { display: block; }
+.gemini-results::-webkit-scrollbar { width: 4px; }
+.gemini-results::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 .gemini-results-title { font-size: 11px; font-weight: 800; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; }
 .ai-card-preview {
   background: var(--panel2); border: 1px solid var(--border); border-radius: 10px;
@@ -607,7 +609,6 @@ function makeCol(col){
     document.querySelectorAll('.col-settings-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
     dropdown.classList.toggle('open');
   };
-  document.addEventListener('click', function(){ dropdown.classList.remove('open'); });
 
   settingsWrap.appendChild(settingsBtn);
   settingsWrap.appendChild(dropdown);
@@ -722,7 +723,6 @@ function makeCard(card, colId){
   drop.querySelector('.ai-refine').onclick = function(e){ e.stopPropagation(); drop.classList.remove('open'); openGeminiForCard(card, colId); };
   menuWrap.appendChild(drop);
   menuWrap.onclick = function(e){ e.stopPropagation(); drop.classList.toggle('open'); };
-  document.addEventListener('click', function(){ drop.classList.remove('open'); });
 
   top.appendChild(titleEl); top.appendChild(menuWrap);
   el.appendChild(top);
@@ -899,9 +899,21 @@ function openTagPicker(card,anchorEl){
   picker.classList.add('open');
   inp.focus();
 }
+// Listener único global — fecha todos os dropdowns e tag picker ao clicar fora
 document.addEventListener('click', function(e){
+  // tag picker
   var picker = document.getElementById('tagPicker');
-  if(!picker.contains(e.target)&&!e.target.classList.contains('tag-add')) picker.classList.remove('open');
+  if(!picker.contains(e.target) && !e.target.classList.contains('tag-add')){
+    picker.classList.remove('open');
+  }
+  // col settings dropdowns
+  if(!e.target.closest('.col-settings-wrap')){
+    document.querySelectorAll('.col-settings-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+  }
+  // card menu dropdowns
+  if(!e.target.closest('.card-menu')){
+    document.querySelectorAll('.card-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+  }
 });
 
 // Add column
@@ -986,6 +998,9 @@ document.getElementById('generateBtn').onclick = function(){
   var cardList = document.getElementById('aiCardList');
   resultsEl.classList.add('show');
   cardList.innerHTML = '<div class="gemini-spinner">Gemini está pensando...</div>';
+  document.getElementById('addAiCards').disabled = true;
+  document.getElementById('addAiCards').textContent = 'Adicionar selecionadas ao board';
+  geminiSelectedCards = [];
   document.getElementById('generateBtn').disabled = true;
 
   var systemPrompt = 'Você é um assistente de gestão de tarefas. O usuário vai descrever um trabalho. Gere entre 3 e 6 tarefas práticas e objetivas em formato JSON. Responda APENAS com um array JSON válido, sem texto antes ou depois, sem markdown. Cada item deve ter: "title" (string, max 60 chars), "desc" (string, max 120 chars), "tag" (string, ex: "Dev", "Design", "QA", "Bug", "Docs", "Test", "Review"). Exemplo de formato: [{"title":"...","desc":"...","tag":"Dev"}]';
