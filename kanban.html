@@ -18,7 +18,9 @@
   --accent4: #ffd740;
   --accent5: #69f0ae;
   --green: #00e676;
+  --gemini: #4285f4;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, monospace;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; }
@@ -54,6 +56,8 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 .btn-ghost:hover { background: var(--border); color: var(--ink); }
 .btn-primary { background: var(--accent1); color: #fff; }
 .btn-primary:hover { background: #6a3de8; }
+.btn-gemini { background: linear-gradient(135deg,#4285f4,#34a853,#fbbc04,#ea4335); color:#fff; }
+.btn-gemini:hover { opacity:.9; }
 .btn svg { width: 14px; height: 14px; }
 
 /* Board */
@@ -62,25 +66,67 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 
 /* Column */
 .col {
-  width: 230px; background: var(--panel); border: 1px solid var(--border);
+  width: 240px; background: var(--panel); border: 1px solid var(--border);
   border-radius: 14px; display: flex; flex-direction: column; max-height: calc(100vh - 120px);
+  transition: box-shadow .15s;
 }
+.col.col-dragging-over { box-shadow: 0 0 0 2px var(--accent1); }
 .col-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 14px 8px; flex-shrink: 0;
+  padding: 12px 14px 8px; flex-shrink: 0; gap: 6px;
 }
 .col-title {
   font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
   color: var(--ink-soft); outline: none; cursor: text; border-radius: 4px;
-  padding: 2px 4px; margin: -2px -4px;
+  padding: 2px 4px; margin: -2px -4px; flex: 1;
 }
 .col-title:focus { background: var(--panel2); color: var(--ink); }
 .col-count {
   font-size: 11px; font-weight: 700; background: var(--panel2);
-  color: var(--ink-soft); border-radius: 20px; padding: 1px 8px;
+  color: var(--ink-soft); border-radius: 20px; padding: 1px 8px; flex-shrink: 0;
 }
-.col-bar { height: 3px; margin: 0 14px 10px; border-radius: 2px; background: var(--border); }
-.col-bar-fill { height: 100%; border-radius: 2px; transition: width .3s; }
+.col-settings-btn {
+  width: 22px; height: 22px; border-radius: 6px; background: none; border: none;
+  color: var(--ink-soft); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 14px; transition: .15s; flex-shrink: 0; padding: 0;
+}
+.col-settings-btn:hover { background: var(--panel2); color: var(--ink); }
+.col-settings-wrap { position: relative; }
+.col-settings-dropdown {
+  position: absolute; right: 0; top: 26px; background: #2a2f58;
+  border: 1px solid var(--border); border-radius: 10px; padding: 8px;
+  z-index: 150; min-width: 180px; display: none;
+}
+.col-settings-dropdown.open { display: block; }
+.col-settings-dropdown label {
+  display: block; font-size: 10px; font-weight: 700; color: var(--ink-soft);
+  text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; margin-top: 8px;
+}
+.col-settings-dropdown label:first-child { margin-top: 0; }
+.col-color-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 4px; }
+.col-color-swatch {
+  width: 22px; height: 22px; border-radius: 5px; cursor: pointer;
+  border: 2px solid transparent; transition: .1s;
+}
+.col-color-swatch:hover, .col-color-swatch.active { border-color: #fff; }
+.col-settings-dropdown input[type="text"] {
+  width: 100%; font-family: var(--sans); font-size: 12px; background: var(--panel2);
+  border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; color: var(--ink);
+  outline: none; margin-bottom: 4px;
+}
+.col-settings-dropdown input[type="text"]:focus { border-color: var(--accent1); }
+.col-btn-row { display: flex; gap: 6px; margin-top: 6px; }
+.col-btn-sm {
+  font-family: var(--sans); font-size: 11px; font-weight: 700; border: none;
+  border-radius: 6px; padding: 5px 10px; cursor: pointer; flex: 1;
+}
+.col-btn-sm.ok { background: var(--accent1); color: #fff; }
+.col-btn-sm.ok:hover { background: #6a3de8; }
+.col-btn-sm.del { background: rgba(255,107,107,.15); color: var(--accent3); }
+.col-btn-sm.del:hover { background: rgba(255,107,107,.25); }
+.col-bar { height: 3px; margin: 0 14px 10px; border-radius: 2px; background: var(--border); cursor: pointer; }
+.col-bar:hover { opacity: .8; }
+.col-bar-fill { height: 100%; border-radius: 2px; transition: width .3s, background .3s; }
 .col-body { flex: 1; overflow-y: auto; padding: 4px 10px 10px; display: flex; flex-direction: column; gap: 8px; }
 .col-body::-webkit-scrollbar { width: 4px; }
 .col-body::-webkit-scrollbar-track { background: transparent; }
@@ -100,7 +146,6 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 }
 .card:active { cursor: grabbing; }
 .card.dragging { opacity: .5; transform: scale(.97); }
-.card.drag-over { box-shadow: 0 0 0 2px var(--accent1); }
 .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .card-title {
   font-size: 13px; font-weight: 700; line-height: 1.35; outline: none;
@@ -111,7 +156,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 .card-menu:hover { color: var(--ink); }
 .card-menu-dropdown {
   position: absolute; right: 0; top: 20px; background: #2a2f58; border: 1px solid var(--border);
-  border-radius: 8px; padding: 4px; min-width: 130px; z-index: 100; display: none;
+  border-radius: 8px; padding: 4px; min-width: 150px; z-index: 100; display: none;
 }
 .card-menu-dropdown.open { display: block; }
 .card-menu-dropdown button {
@@ -121,14 +166,13 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 }
 .card-menu-dropdown button:hover { background: var(--border); }
 .card-menu-dropdown button.danger { color: var(--accent3); }
-
+.card-menu-dropdown button.ai-btn { color: #7ab4ff; }
 .card-desc {
-  font-size: 11.5px; color: var(--ink-soft); line-height: 1.45; margin-bottom: 10px;
+  font-size: 11.5px; color: var(--ink-soft); line-height: 1.45;
   outline: none; cursor: text; border-radius: 5px; padding: 2px 3px; margin: -2px -3px 8px;
 }
 .card-desc:focus { background: rgba(255,255,255,.06); }
 .card-desc:empty::before { content: "Adicionar descrição..."; color: #4a5080; }
-
 .card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
 .tag {
   font-size: 10px; font-weight: 800; border-radius: 5px; padding: 2px 8px;
@@ -136,20 +180,18 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 }
 .tag-add {
   font-size: 10px; font-weight: 700; color: var(--ink-soft); border: 1px dashed var(--border);
-  border-radius: 5px; padding: 2px 7px; cursor: pointer; background: none;
-  font-family: var(--sans);
+  border-radius: 5px; padding: 2px 7px; cursor: pointer; background: none; font-family: var(--sans);
 }
 .tag-add:hover { border-color: var(--accent1); color: var(--accent1); }
-
 .card-progress { margin-bottom: 10px; }
 .progress-label { display: flex; justify-content: space-between; margin-bottom: 5px; }
 .progress-label span { font-size: 10.5px; color: var(--ink-soft); font-weight: 600; }
 .progress-label .pct { color: var(--ink); font-weight: 800; }
-.progress-track { height: 5px; background: var(--border); border-radius: 3px; cursor: pointer; position: relative; }
+.progress-track { height: 5px; background: var(--border); border-radius: 3px; cursor: pointer; }
 .progress-fill { height: 100%; border-radius: 3px; transition: width .2s; }
-
+.progress-track:hover .progress-fill { filter: brightness(1.15); }
 .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
-.card-avatars { display: flex; gap: -4px; }
+.card-avatars { display: flex; }
 .avatar {
   width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--panel2);
   display: flex; align-items: center; justify-content: center; font-size: 9px;
@@ -183,7 +225,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 .rp-avatar {
   width: 54px; height: 54px; border-radius: 50%; background: var(--accent1);
   margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: 800; color: #fff; position: relative; cursor: pointer;
+  font-size: 20px; font-weight: 800; color: #fff; position: relative;
 }
 .rp-avatar-ring {
   position: absolute; inset: -3px; border-radius: 50%;
@@ -194,30 +236,23 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 .rp-name:focus { background: var(--panel2); }
 .rp-role { font-size: 11px; color: var(--ink-soft); margin-top: 2px; outline: none; cursor: text; border-radius: 4px; padding: 1px 4px; }
 .rp-role:focus { background: var(--panel2); }
-
 .rp-section-title { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 10px; }
-
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .stat-box { background: var(--panel2); border-radius: 9px; padding: 9px 8px; text-align: center; }
 .stat-num { font-size: 18px; font-weight: 900; }
 .stat-name { font-size: 9px; font-weight: 700; color: var(--ink-soft); margin-top: 2px; outline: none; cursor: text; }
 .stat-name:focus { background: rgba(255,255,255,.06); border-radius: 3px; }
-
 .efficiency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .eff-box { background: var(--panel2); border-radius: 9px; padding: 8px; text-align: center; }
 .eff-ring { position: relative; width: 44px; height: 44px; margin: 0 auto 5px; }
 .eff-ring svg { transform: rotate(-90deg); }
 .eff-ring .bg { fill: none; stroke: var(--border); stroke-width: 4; }
-.eff-ring .fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset .4s; }
+.eff-ring .fill { fill: none; stroke-width: 4; stroke-linecap: round; }
 .eff-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; }
 .eff-name { font-size: 9px; font-weight: 700; color: var(--ink-soft); outline: none; cursor: text; }
 .eff-name:focus { background: rgba(255,255,255,.06); border-radius: 3px; }
-
 .plan-list { display: flex; flex-direction: column; gap: 6px; }
-.plan-item {
-  background: var(--panel2); border-radius: 8px; padding: 7px 10px;
-  display: flex; align-items: center; gap: 8px; cursor: pointer;
-}
+.plan-item { background: var(--panel2); border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .plan-item:hover { background: var(--border); }
 .plan-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .plan-time { font-size: 10px; font-weight: 800; color: var(--ink-soft); white-space: nowrap; }
@@ -226,7 +261,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 .plan-add { text-align: center; padding: 6px; font-size: 11px; font-weight: 700; color: var(--ink-soft); cursor: pointer; border: 1.5px dashed var(--border); border-radius: 8px; transition: .15s; }
 .plan-add:hover { border-color: var(--accent1); color: var(--accent1); }
 
-/* Tag color picker */
+/* Tag picker */
 .tag-picker {
   position: fixed; background: #2a2f58; border: 1px solid var(--border);
   border-radius: 10px; padding: 10px; z-index: 200; display: none;
@@ -237,13 +272,94 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 .tp-swatch:hover { border-color: #fff; }
 .tp-input { width: 100%; font-family: var(--sans); font-size: 11px; background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; padding: 5px 8px; color: var(--ink); outline: none; margin-top: 4px; }
 
-/* Progress drag */
-.progress-track:hover .progress-fill { filter: brightness(1.15); }
-
 /* Scrollbar for board */
 .board-wrap::-webkit-scrollbar { height: 6px; }
 .board-wrap::-webkit-scrollbar-track { background: transparent; }
 .board-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ===== GEMINI MODAL ===== */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+  z-index: 300; display: none; align-items: center; justify-content: center;
+}
+.overlay.open { display: flex; }
+.gemini-modal {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+  width: 520px; max-width: calc(100vw - 32px); padding: 28px; position: relative;
+  box-shadow: 0 24px 60px rgba(0,0,0,.5);
+}
+.gemini-modal-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.gemini-logo {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg,#4285f4,#34a853,#fbbc04,#ea4335);
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.gemini-modal-header h2 { font-size: 17px; font-weight: 800; flex: 1; }
+.gemini-modal-close {
+  width: 30px; height: 30px; border-radius: 8px; background: var(--panel2); border: none;
+  color: var(--ink-soft); font-size: 18px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: .15s;
+}
+.gemini-modal-close:hover { background: var(--border); color: var(--ink); }
+.gemini-field { margin-bottom: 14px; }
+.gemini-field label { display: block; font-size: 11px; font-weight: 700; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
+.gemini-field input, .gemini-field textarea, .gemini-field select {
+  width: 100%; font-family: var(--sans); font-size: 13px; background: var(--panel2);
+  border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px;
+  color: var(--ink); outline: none; transition: border-color .15s; resize: vertical;
+}
+.gemini-field input:focus, .gemini-field textarea:focus, .gemini-field select:focus { border-color: var(--gemini); }
+.gemini-field input[type="password"] { font-family: var(--mono); letter-spacing: .05em; }
+.gemini-key-row { display: flex; gap: 8px; }
+.gemini-key-row input { flex: 1; }
+.gemini-key-row button {
+  font-family: var(--sans); font-size: 11px; font-weight: 700; background: var(--panel2);
+  border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; color: var(--ink-soft);
+  cursor: pointer; white-space: nowrap; transition: .15s;
+}
+.gemini-key-row button:hover { background: var(--border); color: var(--ink); }
+.gemini-actions { display: flex; gap: 10px; margin-top: 6px; }
+.gemini-actions button { flex: 1; }
+.btn-generate {
+  font-family: var(--sans); font-size: 13px; font-weight: 700;
+  background: linear-gradient(135deg,#4285f4,#34a853); color: #fff;
+  border: none; border-radius: 9px; padding: 11px; cursor: pointer; transition: .15s;
+}
+.btn-generate:hover { opacity: .9; transform: translateY(-1px); }
+.btn-generate:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.gemini-results { margin-top: 18px; display: none; }
+.gemini-results.show { display: block; }
+.gemini-results-title { font-size: 11px; font-weight: 800; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; }
+.ai-card-preview {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 11px 13px; margin-bottom: 8px; cursor: pointer; transition: border-color .15s;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.ai-card-preview:hover { border-color: var(--gemini); }
+.ai-card-preview.selected { border-color: var(--accent5); background: rgba(105,240,174,.06); }
+.ai-card-preview-check { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--border); flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: .15s; }
+.ai-card-preview.selected .ai-card-preview-check { background: var(--accent5); border-color: var(--accent5); color: #000; }
+.ai-card-preview-body { flex: 1; }
+.ai-card-preview-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.ai-card-preview-desc { font-size: 11px; color: var(--ink-soft); line-height: 1.4; }
+.ai-card-preview-tag { display: inline-block; font-size: 10px; font-weight: 700; border-radius: 4px; padding: 1px 7px; margin-top: 5px; }
+.gemini-add-btn {
+  width: 100%; font-family: var(--sans); font-size: 13px; font-weight: 700;
+  background: var(--accent5); color: #0a2a1a; border: none; border-radius: 9px;
+  padding: 10px; cursor: pointer; margin-top: 4px; transition: .15s;
+}
+.gemini-add-btn:hover { background: #5be0a0; }
+.gemini-add-btn:disabled { opacity: .4; cursor: not-allowed; }
+.gemini-spinner { text-align: center; padding: 20px; color: var(--ink-soft); font-size: 13px; }
+.gemini-spinner::before { content: "✨"; animation: pulse 1s infinite; display: inline-block; margin-right: 8px; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+.gemini-error { color: var(--accent3); font-size: 12px; margin-top: 8px; padding: 8px 12px; background: rgba(255,107,107,.1); border-radius: 7px; }
+.key-saved { color: var(--accent5); font-size: 11px; margin-top: 4px; }
+
+/* Column color swatches */
+.col-colors { display: flex; flex-wrap: wrap; gap: 5px; }
+.col-color-dot { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: .1s; }
+.col-color-dot:hover, .col-color-dot.active { border-color: #fff; }
 </style>
 </head>
 <body>
@@ -264,16 +380,14 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
     <h1 contenteditable="true" spellcheck="false">Task Management</h1>
     <div class="header-actions">
       <button class="btn btn-ghost" id="addColBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-        Coluna
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Coluna
       </button>
+      <button class="btn btn-gemini" id="geminiBtn">✨ Gemini IA</button>
       <button class="btn btn-primary" id="exportBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-        Exportar
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>Exportar
       </button>
     </div>
   </div>
-
   <div class="board-wrap">
     <div class="board" id="board"></div>
   </div>
@@ -284,6 +398,48 @@ body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-h
 
 <!-- Tag picker -->
 <div class="tag-picker" id="tagPicker"></div>
+
+<!-- Gemini Modal -->
+<div class="overlay" id="geminiOverlay">
+  <div class="gemini-modal">
+    <div class="gemini-modal-header">
+      <div class="gemini-logo">✨</div>
+      <h2>Criar tarefas com Gemini</h2>
+      <button class="gemini-modal-close" id="geminiClose">×</button>
+    </div>
+
+    <div class="gemini-field">
+      <label>Chave de API do Gemini</label>
+      <div class="gemini-key-row">
+        <input type="password" id="geminiKey" placeholder="AIza..." autocomplete="off">
+        <button id="saveKeyBtn">Salvar</button>
+      </div>
+      <div id="keySavedMsg"></div>
+    </div>
+
+    <div class="gemini-field">
+      <label>O que você precisa fazer? Descreva as tarefas</label>
+      <textarea id="geminiPrompt" rows="3" placeholder="Ex: preciso lançar uma nova feature de login com Google, incluindo backend, frontend e testes..."></textarea>
+    </div>
+
+    <div class="gemini-field">
+      <label>Adicionar tarefas na coluna</label>
+      <select id="geminiColSelect"></select>
+    </div>
+
+    <div class="gemini-actions">
+      <button class="btn-generate" id="generateBtn">✨ Gerar tarefas</button>
+    </div>
+
+    <div id="geminiError" class="gemini-error" style="display:none"></div>
+
+    <div class="gemini-results" id="geminiResults">
+      <div class="gemini-results-title">Selecione as tarefas para adicionar</div>
+      <div id="aiCardList"></div>
+      <button class="gemini-add-btn" id="addAiCards" disabled>Adicionar selecionadas ao board</button>
+    </div>
+  </div>
+</div>
 
 <script>
 var TAG_COLORS = [
@@ -296,47 +452,48 @@ var TAG_COLORS = [
   {bg:"#e91e6322",color:"#f48fb1",label:"Rosa"},
   {bg:"#2196f322",color:"#90caf9",label:"Azul"},
 ];
+var COL_COLORS = ["#8890c4","#00bcd4","#7c4dff","#69f0ae","#ffd740","#ff6b6b","#ff9800","#e91e63","#4caf50","#2196f3"];
 var AVATAR_COLORS = ["#7c4dff","#00bcd4","#ff6b6b","#ffd740","#69f0ae","#ff9800","#e91e63","#2196f3"];
 
 function uid(){ return Math.random().toString(36).slice(2,9); }
 
 function defaultData(){
   return {
-    title: "Task Management",
-    cols: [
-      {id:uid(), title:"DRAFT", color:"#8890c4", cards:[
+    title:"Task Management",
+    cols:[
+      {id:uid(),title:"DRAFT",color:"#8890c4",cards:[
         {id:uid(),title:"Main Task",desc:"Incididunt ut labore et dolore",tags:[{label:"Design",bg:"#7c4dff22",color:"#b39ddb"}],progress:0,avatars:["K","L"],starred:false,checks:0,comments:0},
         {id:uid(),title:"Secondary Task",desc:"Ad minim veniam quis do ex",tags:[],progress:0,avatars:["G"],starred:true,checks:2,comments:1},
         {id:uid(),title:"Tertiary Task",desc:"Commodo consequat",tags:[],progress:0,avatars:["H"],starred:false,checks:0,comments:0}
       ]},
-      {id:uid(), title:"IN PROGRESS", color:"#00bcd4", cards:[
+      {id:uid(),title:"IN PROGRESS",color:"#00bcd4",cards:[
         {id:uid(),title:"Main Task",desc:"Incididunt ut labore et dolore",tags:[{label:"Dev",bg:"#00bcd422",color:"#4dd0e1"}],progress:75,avatars:["N","V"],starred:true,checks:3,comments:2},
         {id:uid(),title:"Secondary Task",desc:"Incididunt ut labore et dolore",tags:[{label:"Review",bg:"#ff980022",color:"#ffcc80"}],progress:50,avatars:["J"],starred:false,checks:1,comments:0}
       ]},
-      {id:uid(), title:"EDITING", color:"#7c4dff", cards:[
+      {id:uid(),title:"EDITING",color:"#7c4dff",cards:[
         {id:uid(),title:"Main Task",desc:"Adipiscing elit sed do eiusmod",tags:[{label:"UI",bg:"#69f0ae22",color:"#a5d6a7"},{label:"QA",bg:"#ffd74022",color:"#ffe082"}],progress:90,avatars:["K","G","N"],starred:false,checks:4,comments:3},
         {id:uid(),title:"Secondary Task",desc:"Ut enim ad minim",tags:[{label:"Bug",bg:"#ff6b6b22",color:"#ef9a9a"}],progress:60,avatars:["L"],starred:true,checks:2,comments:1},
         {id:uid(),title:"Tertiary Task",desc:"Adipiscing elit sed do eiusmod",tags:[{label:"Fix",bg:"#7c4dff22",color:"#b39ddb"}],progress:30,avatars:["H","V"],starred:false,checks:1,comments:0}
       ]},
-      {id:uid(), title:"DONE", color:"#69f0ae", cards:[
+      {id:uid(),title:"DONE",color:"#69f0ae",cards:[
         {id:uid(),title:"Main Task",desc:"Adipiscing elit sed do eiusmod",tags:[{label:"Done",bg:"#69f0ae22",color:"#a5d6a7"}],progress:100,avatars:["J","K"],starred:false,checks:5,comments:2},
         {id:uid(),title:"Secondary Task",desc:"Incididunt ut labore et do",tags:[],progress:100,avatars:["G"],starred:true,checks:3,comments:1}
       ]}
     ],
-    profile: { name:"Nome\nSobrenome", role:"Ajustar conforme necessário", initials:"NS" },
-    stats: [
+    profile:{name:"Nome\nSobrenome",role:"Ajustar conforme necessário"},
+    stats:[
       {num:210,color:"#7c4dff",label:"Autor A"},
       {num:110,color:"#00bcd4",label:"Autor B"},
       {num:176,color:"#ff6b6b",label:"Autor C"},
       {num:45, color:"#ffd740",label:"Autor D"}
     ],
-    efficiency: [
+    efficiency:[
       {pct:75,color:"#7c4dff",label:"Autor A"},
       {pct:44,color:"#00bcd4",label:"Autor B"},
       {pct:68,color:"#ff6b6b",label:"Autor C"},
       {pct:55,color:"#ffd740",label:"Autor D"}
     ],
-    plan: [
+    plan:[
       {time:"12:00 - 13:00",text:"Reunião de planejamento",color:"#7c4dff"},
       {time:"13:00 - 14:00",text:"Revisão de código",color:"#00bcd4"},
       {time:"14:00 - 15:00",text:"Deploy produção",color:"#ff6b6b"},
@@ -346,25 +503,19 @@ function defaultData(){
 }
 
 var state = defaultData();
-var dragSrc = null; // {colId, cardId}
+var dragSrc = null;
 var dragEl = null;
 var placeholder = null;
 
-// ---- Render ----
-function render(){
-  renderBoard();
-  renderRightPanel();
-}
+// ======= RENDER =======
+function render(){ renderBoard(); renderRightPanel(); }
 
 function renderBoard(){
   var board = document.getElementById('board');
   board.innerHTML = "";
-  state.cols.forEach(function(col){
-    board.appendChild(makeCol(col));
-  });
-  // Add column ghost
+  state.cols.forEach(function(col){ board.appendChild(makeCol(col)); });
   var ghost = document.createElement('div');
-  ghost.style.cssText = "width:230px;flex-shrink:0;";
+  ghost.style.cssText = "width:10px;flex-shrink:0;";
   board.appendChild(ghost);
 }
 
@@ -376,59 +527,137 @@ function makeCol(col){
   // Header
   var hdr = document.createElement('div');
   hdr.className = 'col-header';
+
   var titleEl = document.createElement('div');
   titleEl.className = 'col-title';
   titleEl.contentEditable = "true";
   titleEl.spellcheck = false;
   titleEl.textContent = col.title;
-  titleEl.addEventListener('blur', function(){ col.title = titleEl.textContent.trim().toUpperCase(); updateColCounts(); });
+  titleEl.addEventListener('blur', function(){ col.title = titleEl.textContent.trim().toUpperCase() || "COLUNA"; updateColCounts(); });
+
   var countEl = document.createElement('div');
   countEl.className = 'col-count';
   countEl.textContent = col.cards.length;
-  hdr.appendChild(titleEl); hdr.appendChild(countEl);
+
+  // Settings button
+  var settingsWrap = document.createElement('div');
+  settingsWrap.className = 'col-settings-wrap';
+  var settingsBtn = document.createElement('button');
+  settingsBtn.className = 'col-settings-btn';
+  settingsBtn.title = 'Configurar coluna';
+  settingsBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>';
+
+  var dropdown = document.createElement('div');
+  dropdown.className = 'col-settings-dropdown';
+
+  // Color picker inside dropdown
+  var colorLabel = document.createElement('label');
+  colorLabel.textContent = 'Cor da coluna';
+  dropdown.appendChild(colorLabel);
+  var colorGrid = document.createElement('div');
+  colorGrid.className = 'col-color-grid';
+  COL_COLORS.forEach(function(c){
+    var sw = document.createElement('div');
+    sw.className = 'col-color-dot' + (col.color===c ? ' active' : '');
+    sw.style.background = c;
+    sw.title = c;
+    sw.onclick = function(){
+      col.color = c;
+      colorGrid.querySelectorAll('.col-color-dot').forEach(function(d){ d.classList.remove('active'); });
+      sw.classList.add('active');
+      // update bar immediately
+      el.querySelector('.col-bar-fill').style.background = c;
+    };
+    colorGrid.appendChild(sw);
+  });
+  dropdown.appendChild(colorGrid);
+
+  // Title rename inside dropdown
+  var nameLabel = document.createElement('label');
+  nameLabel.textContent = 'Renomear';
+  dropdown.appendChild(nameLabel);
+  var nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.value = col.title;
+  nameInput.placeholder = 'Nome da coluna';
+  nameInput.addEventListener('input', function(){
+    col.title = nameInput.value.trim().toUpperCase() || col.title;
+    titleEl.textContent = col.title;
+    updateColCounts();
+  });
+  dropdown.appendChild(nameInput);
+
+  // Buttons row
+  var btnRow = document.createElement('div');
+  btnRow.className = 'col-btn-row';
+  var delBtn = document.createElement('button');
+  delBtn.className = 'col-btn-sm del';
+  delBtn.textContent = 'Excluir coluna';
+  delBtn.onclick = function(e){
+    e.stopPropagation();
+    if(col.cards.length > 0 && !confirm('Esta coluna tem '+col.cards.length+' cartão(ões). Excluir mesmo assim?')) return;
+    state.cols = state.cols.filter(function(c){ return c.id!==col.id; });
+    render();
+  };
+  btnRow.appendChild(delBtn);
+  dropdown.appendChild(btnRow);
+
+  settingsBtn.onclick = function(e){
+    e.stopPropagation();
+    document.querySelectorAll('.col-settings-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+    dropdown.classList.toggle('open');
+  };
+  document.addEventListener('click', function(){ dropdown.classList.remove('open'); });
+
+  settingsWrap.appendChild(settingsBtn);
+  settingsWrap.appendChild(dropdown);
+
+  hdr.appendChild(titleEl);
+  hdr.appendChild(countEl);
+  hdr.appendChild(settingsWrap);
   el.appendChild(hdr);
 
-  // Bar
+  // Color bar
   var bar = document.createElement('div');
   bar.className = 'col-bar';
+  bar.title = 'Clique para mudar a cor';
   var fill = document.createElement('div');
   fill.className = 'col-bar-fill';
   fill.style.width = "100%";
   fill.style.background = col.color;
   bar.appendChild(fill);
+  bar.onclick = function(e){
+    e.stopPropagation();
+    document.querySelectorAll('.col-settings-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+    dropdown.classList.toggle('open');
+  };
   el.appendChild(bar);
 
   // Body
   var body = document.createElement('div');
   body.className = 'col-body';
   body.dataset.colId = col.id;
-  col.cards.forEach(function(card){
-    body.appendChild(makeCard(card, col.id));
-  });
+  col.cards.forEach(function(card){ body.appendChild(makeCard(card, col.id)); });
 
-  // Drop zone events
   body.addEventListener('dragover', function(e){
     e.preventDefault();
     var afterEl = getDragAfterElement(body, e.clientY);
     if(placeholder){
-      if(afterEl){ body.insertBefore(placeholder, afterEl); }
-      else { body.appendChild(placeholder); }
+      if(afterEl) body.insertBefore(placeholder, afterEl);
+      else body.appendChild(placeholder);
     }
   });
   body.addEventListener('drop', function(e){
     e.preventDefault();
     if(!dragSrc) return;
-    var toColId = col.id;
     var fromCol = state.cols.find(function(c){ return c.id===dragSrc.colId; });
     var cardIdx = fromCol.cards.findIndex(function(c){ return c.id===dragSrc.cardId; });
     var card = fromCol.cards.splice(cardIdx,1)[0];
-    var toCol = state.cols.find(function(c){ return c.id===toColId; });
-    // find drop position
+    var toCol = state.cols.find(function(c){ return c.id===col.id; });
     if(placeholder && placeholder.parentNode===body){
-      var allCards = Array.from(body.querySelectorAll('.card'));
       var phIdx = Array.from(body.children).indexOf(placeholder);
-      var cardsBefore = Array.from(body.children).slice(0, phIdx).filter(function(el){ return el.classList.contains('card'); });
-      toCol.cards.splice(cardsBefore.length, 0, card);
+      var cardsBefore = Array.from(body.children).slice(0,phIdx).filter(function(el){ return el.classList.contains('card'); });
+      toCol.cards.splice(cardsBefore.length,0,card);
     } else {
       toCol.cards.push(card);
     }
@@ -453,8 +682,8 @@ function makeCard(card, colId){
   el.draggable = true;
   el.dataset.cardId = card.id;
 
-  el.addEventListener('dragstart', function(e){
-    dragSrc = {colId: colId, cardId: card.id};
+  el.addEventListener('dragstart', function(){
+    dragSrc = {colId:colId, cardId:card.id};
     dragEl = el;
     setTimeout(function(){ el.classList.add('dragging'); }, 0);
     placeholder = document.createElement('div');
@@ -466,7 +695,7 @@ function makeCard(card, colId){
     placeholder = null; dragEl = null;
   });
 
-  // Top row
+  // Top
   var top = document.createElement('div');
   top.className = 'card-top';
   var titleEl = document.createElement('div');
@@ -482,10 +711,15 @@ function makeCard(card, colId){
   menuWrap.textContent = '⋯';
   var drop = document.createElement('div');
   drop.className = 'card-menu-dropdown';
-  drop.innerHTML = '<button class="move-left">← Mover esquerda</button><button class="move-right">Mover direita →</button><button class="danger delete-card">Excluir cartão</button>';
-  drop.querySelector('.move-left').onclick = function(e){ e.stopPropagation(); moveCard(colId, card.id, -1); };
-  drop.querySelector('.move-right').onclick = function(e){ e.stopPropagation(); moveCard(colId, card.id, 1); };
-  drop.querySelector('.delete-card').onclick = function(e){ e.stopPropagation(); deleteCard(colId, card.id); };
+  drop.innerHTML =
+    '<button class="move-left">← Mover esquerda</button>' +
+    '<button class="move-right">Mover direita →</button>' +
+    '<button class="ai-btn ai-refine">✨ Melhorar com IA</button>' +
+    '<button class="danger delete-card">Excluir cartão</button>';
+  drop.querySelector('.move-left').onclick = function(e){ e.stopPropagation(); moveCard(colId,card.id,-1); };
+  drop.querySelector('.move-right').onclick = function(e){ e.stopPropagation(); moveCard(colId,card.id,1); };
+  drop.querySelector('.delete-card').onclick = function(e){ e.stopPropagation(); deleteCard(colId,card.id); };
+  drop.querySelector('.ai-refine').onclick = function(e){ e.stopPropagation(); drop.classList.remove('open'); openGeminiForCard(card, colId); };
   menuWrap.appendChild(drop);
   menuWrap.onclick = function(e){ e.stopPropagation(); drop.classList.toggle('open'); };
   document.addEventListener('click', function(){ drop.classList.remove('open'); });
@@ -506,7 +740,7 @@ function makeCard(card, colId){
   // Tags
   var tagsEl = document.createElement('div');
   tagsEl.className = 'card-tags';
-  card.tags.forEach(function(tag, ti){
+  card.tags.forEach(function(tag,ti){
     var t = document.createElement('span');
     t.className = 'tag';
     t.style.background = tag.bg;
@@ -516,7 +750,7 @@ function makeCard(card, colId){
     t.spellcheck = false;
     t.addEventListener('blur', function(){ tag.label = t.textContent.trim() || "Tag"; });
     t.addEventListener('mousedown', function(e){ e.stopPropagation(); });
-    t.addEventListener('dblclick', function(e){ e.stopPropagation(); removeTag(card, ti); render(); });
+    t.addEventListener('dblclick', function(e){ e.stopPropagation(); removeTag(card,ti); render(); });
     t.title = "Duplo clique para remover";
     tagsEl.appendChild(t);
   });
@@ -524,46 +758,44 @@ function makeCard(card, colId){
   addTag.className = 'tag-add';
   addTag.textContent = '+ tag';
   addTag.addEventListener('mousedown', function(e){ e.stopPropagation(); });
-  addTag.onclick = function(e){ e.stopPropagation(); openTagPicker(card, addTag); };
+  addTag.onclick = function(e){ e.stopPropagation(); openTagPicker(card,addTag); };
   tagsEl.appendChild(addTag);
   el.appendChild(tagsEl);
 
   // Progress
-  if(card.progress !== undefined){
-    var prog = document.createElement('div');
-    prog.className = 'card-progress';
-    var lbl = document.createElement('div');
-    lbl.className = 'progress-label';
-    lbl.innerHTML = '<span>Progresso</span><span class="pct">'+card.progress+'%</span>';
-    var track = document.createElement('div');
-    track.className = 'progress-track';
-    var fillEl = document.createElement('div');
-    fillEl.className = 'progress-fill';
-    fillEl.style.width = card.progress+'%';
-    fillEl.style.background = getProgressColor(card.progress);
-    track.appendChild(fillEl);
-    track.addEventListener('click', function(e){
-      var rect = track.getBoundingClientRect();
-      var pct = Math.round(((e.clientX - rect.left) / rect.width) * 100);
-      pct = Math.max(0, Math.min(100, pct));
-      card.progress = pct;
-      fillEl.style.width = pct+'%';
-      fillEl.style.background = getProgressColor(pct);
-      lbl.querySelector('.pct').textContent = pct+'%';
-    });
-    prog.appendChild(lbl); prog.appendChild(track);
-    el.appendChild(prog);
-  }
+  var prog = document.createElement('div');
+  prog.className = 'card-progress';
+  var lbl = document.createElement('div');
+  lbl.className = 'progress-label';
+  lbl.innerHTML = '<span>Progresso</span><span class="pct">'+card.progress+'%</span>';
+  var track = document.createElement('div');
+  track.className = 'progress-track';
+  var fillEl = document.createElement('div');
+  fillEl.className = 'progress-fill';
+  fillEl.style.width = card.progress+'%';
+  fillEl.style.background = getProgressColor(card.progress);
+  track.appendChild(fillEl);
+  track.addEventListener('click', function(e){
+    var rect = track.getBoundingClientRect();
+    var pct = Math.round(((e.clientX-rect.left)/rect.width)*100);
+    pct = Math.max(0,Math.min(100,pct));
+    card.progress = pct;
+    fillEl.style.width = pct+'%';
+    fillEl.style.background = getProgressColor(pct);
+    lbl.querySelector('.pct').textContent = pct+'%';
+  });
+  prog.appendChild(lbl); prog.appendChild(track);
+  el.appendChild(prog);
 
   // Footer
   var footer = document.createElement('div');
   footer.className = 'card-footer';
   var avatarsEl = document.createElement('div');
   avatarsEl.className = 'card-avatars';
-  card.avatars.forEach(function(initial, ai){
+  card.avatars.forEach(function(initial,ai){
     var av = document.createElement('div');
     av.className = 'avatar';
-    av.style.background = AVATAR_COLORS[ai % AVATAR_COLORS.length];
+    av.style.background = AVATAR_COLORS[ai%AVATAR_COLORS.length];
     av.textContent = initial;
     av.title = "Duplo clique para remover";
     av.addEventListener('dblclick', function(e){ e.stopPropagation(); card.avatars.splice(ai,1); render(); });
@@ -576,91 +808,72 @@ function makeCard(card, colId){
   addAv.style.fontSize = '14px';
   addAv.textContent = '+';
   addAv.title = "Adicionar membro";
-  addAv.onclick = function(e){ e.stopPropagation(); var ini = prompt("Inicial do membro (ex: K):",""); if(ini) card.avatars.push(ini.slice(0,2).toUpperCase()); render(); };
+  addAv.onclick = function(e){ e.stopPropagation(); var ini=prompt("Inicial do membro (ex: K):",""); if(ini) card.avatars.push(ini.slice(0,2).toUpperCase()); render(); };
   avatarsEl.appendChild(addAv);
 
   var icons = document.createElement('div');
   icons.className = 'card-icons';
   var comments = document.createElement('span');
   comments.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>'+card.comments;
-  comments.title = "Comentários";
-  comments.onclick = function(e){ e.stopPropagation(); card.comments++; comments.lastChild.textContent = card.comments; };
-
+  comments.onclick = function(e){ e.stopPropagation(); card.comments++; comments.lastChild.textContent=card.comments; };
   var checks = document.createElement('span');
   checks.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>'+card.checks;
-  checks.title = "Clique para incrementar";
-  checks.onclick = function(e){ e.stopPropagation(); card.checks++; checks.lastChild.textContent = card.checks; };
-
+  checks.onclick = function(e){ e.stopPropagation(); card.checks++; checks.lastChild.textContent=card.checks; };
   var star = document.createElement('span');
-  star.className = 'star ' + (card.starred ? 'on' : 'off');
+  star.className = 'star '+(card.starred?'on':'off');
   star.textContent = '★';
-  star.onclick = function(e){ e.stopPropagation(); card.starred = !card.starred; star.className = 'star '+(card.starred?'on':'off'); };
-
+  star.onclick = function(e){ e.stopPropagation(); card.starred=!card.starred; star.className='star '+(card.starred?'on':'off'); };
   icons.appendChild(comments); icons.appendChild(checks); icons.appendChild(star);
   footer.appendChild(avatarsEl); footer.appendChild(icons);
   el.appendChild(footer);
-
   return el;
 }
 
 function getProgressColor(pct){
-  if(pct >= 80) return "#69f0ae";
-  if(pct >= 50) return "#00bcd4";
-  if(pct >= 25) return "#ffd740";
+  if(pct>=80) return "#69f0ae";
+  if(pct>=50) return "#00bcd4";
+  if(pct>=25) return "#ffd740";
   return "#ff6b6b";
 }
-
-function getDragAfterElement(container, y){
+function getDragAfterElement(container,y){
   var els = Array.from(container.querySelectorAll('.card:not(.dragging)'));
-  return els.reduce(function(closest, el){
+  return els.reduce(function(closest,el){
     var box = el.getBoundingClientRect();
     var offset = y - box.top - box.height/2;
-    if(offset < 0 && offset > closest.offset){ return {offset:offset, element:el}; }
+    if(offset<0 && offset>closest.offset) return {offset:offset,element:el};
     return closest;
-  }, {offset: Number.NEGATIVE_INFINITY}).element;
+  },{offset:Number.NEGATIVE_INFINITY}).element;
 }
-
 function updateColCounts(){
   document.querySelectorAll('.col').forEach(function(colEl){
-    var colId = colEl.dataset.colId;
-    var col = state.cols.find(function(c){ return c.id===colId; });
+    var col = state.cols.find(function(c){ return c.id===colEl.dataset.colId; });
     if(col) colEl.querySelector('.col-count').textContent = col.cards.length;
   });
 }
-
 function addCard(colId){
   var col = state.cols.find(function(c){ return c.id===colId; });
-  col.cards.push({
-    id: uid(), title:"Nova Tarefa", desc:"", tags:[], progress:0,
-    avatars:[], starred:false, checks:0, comments:0
-  });
+  col.cards.push({id:uid(),title:"Nova Tarefa",desc:"",tags:[],progress:0,avatars:[],starred:false,checks:0,comments:0});
   render();
 }
-
-function deleteCard(colId, cardId){
+function deleteCard(colId,cardId){
   var col = state.cols.find(function(c){ return c.id===colId; });
   col.cards = col.cards.filter(function(c){ return c.id!==cardId; });
   render();
 }
-
-function moveCard(colId, cardId, dir){
+function moveCard(colId,cardId,dir){
   var colIdx = state.cols.findIndex(function(c){ return c.id===colId; });
-  var targetIdx = colIdx + dir;
-  if(targetIdx < 0 || targetIdx >= state.cols.length) return;
+  var targetIdx = colIdx+dir;
+  if(targetIdx<0||targetIdx>=state.cols.length) return;
   var fromCol = state.cols[colIdx];
   var cardIdx = fromCol.cards.findIndex(function(c){ return c.id===cardId; });
   var card = fromCol.cards.splice(cardIdx,1)[0];
   state.cols[targetIdx].cards.push(card);
   render();
 }
-
-function removeTag(card, idx){
-  card.tags.splice(idx,1);
-}
+function removeTag(card,idx){ card.tags.splice(idx,1); }
 
 // Tag picker
-var tagPickerTarget = null;
-function openTagPicker(card, anchorEl){
+function openTagPicker(card,anchorEl){
   var picker = document.getElementById('tagPicker');
   picker.innerHTML = '';
   TAG_COLORS.forEach(function(tc){
@@ -670,8 +883,7 @@ function openTagPicker(card, anchorEl){
     sw.style.border = '2px solid '+tc.color;
     sw.title = tc.label;
     sw.onclick = function(){
-      var name = inp.value.trim() || tc.label;
-      card.tags.push({label:name, bg:tc.bg, color:tc.color});
+      card.tags.push({label:inp.value.trim()||tc.label,bg:tc.bg,color:tc.color});
       picker.classList.remove('open');
       render();
     };
@@ -681,7 +893,6 @@ function openTagPicker(card, anchorEl){
   inp.className = 'tp-input';
   inp.placeholder = 'Nome da tag...';
   picker.appendChild(inp);
-
   var rect = anchorEl.getBoundingClientRect();
   picker.style.left = rect.left+'px';
   picker.style.top = (rect.bottom+6)+'px';
@@ -690,20 +901,12 @@ function openTagPicker(card, anchorEl){
 }
 document.addEventListener('click', function(e){
   var picker = document.getElementById('tagPicker');
-  if(!picker.contains(e.target) && !e.target.classList.contains('tag-add')){
-    picker.classList.remove('open');
-  }
+  if(!picker.contains(e.target)&&!e.target.classList.contains('tag-add')) picker.classList.remove('open');
 });
 
 // Add column
 document.getElementById('addColBtn').onclick = function(){
-  var colors = ["#8890c4","#00bcd4","#7c4dff","#69f0ae","#ffd740","#ff6b6b"];
-  state.cols.push({
-    id: uid(),
-    title: "NOVA COLUNA",
-    color: colors[state.cols.length % colors.length],
-    cards: []
-  });
+  state.cols.push({id:uid(),title:"NOVA COLUNA",color:COL_COLORS[state.cols.length%COL_COLORS.length],cards:[]});
   render();
 };
 
@@ -712,152 +915,248 @@ document.getElementById('exportBtn').onclick = function(){
   var blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
-  a.href = url; a.download = "kanban.json"; a.click();
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  a.href=url; a.download="kanban.json"; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); },1000);
 };
 
-// Right panel
+// ======= GEMINI =======
+var geminiSelectedCards = [];
+var geminiTargetCard = null;
+var geminiTargetColId = null;
+
+function getGeminiKey(){
+  return localStorage.getItem('gemini_api_key')||'';
+}
+function loadKeyToInput(){
+  var k = getGeminiKey();
+  if(k) document.getElementById('geminiKey').value = k;
+}
+
+document.getElementById('saveKeyBtn').onclick = function(){
+  var k = document.getElementById('geminiKey').value.trim();
+  if(k){ localStorage.setItem('gemini_api_key',k); document.getElementById('keySavedMsg').innerHTML='<div class="key-saved">✓ Chave salva no navegador</div>'; }
+  else { localStorage.removeItem('gemini_api_key'); document.getElementById('keySavedMsg').textContent=''; }
+};
+
+function populateColSelect(){
+  var sel = document.getElementById('geminiColSelect');
+  sel.innerHTML = '';
+  state.cols.forEach(function(col){
+    var o = document.createElement('option');
+    o.value = col.id;
+    o.textContent = col.title;
+    sel.appendChild(o);
+  });
+}
+
+function openGeminiModal(){
+  populateColSelect();
+  loadKeyToInput();
+  document.getElementById('geminiResults').classList.remove('show');
+  document.getElementById('geminiError').style.display='none';
+  document.getElementById('aiCardList').innerHTML='';
+  geminiSelectedCards = [];
+  document.getElementById('addAiCards').disabled = true;
+  document.getElementById('geminiOverlay').classList.add('open');
+  document.getElementById('geminiPrompt').focus();
+}
+
+function openGeminiForCard(card, colId){
+  geminiTargetCard = card;
+  geminiTargetColId = colId;
+  openGeminiModal();
+  document.getElementById('geminiPrompt').value = 'Melhore a tarefa: "'+card.title+'". Descrição atual: "'+card.desc+'". Sugira subtarefas ou melhorias detalhadas.';
+  var sel = document.getElementById('geminiColSelect');
+  sel.value = colId;
+}
+
+document.getElementById('geminiBtn').onclick = function(){ geminiTargetCard=null; geminiTargetColId=null; openGeminiModal(); };
+document.getElementById('geminiClose').onclick = function(){ document.getElementById('geminiOverlay').classList.remove('open'); };
+document.getElementById('geminiOverlay').onclick = function(e){ if(e.target===this) this.classList.remove('open'); };
+
+document.getElementById('generateBtn').onclick = function(){
+  var key = document.getElementById('geminiKey').value.trim() || getGeminiKey();
+  var prompt = document.getElementById('geminiPrompt').value.trim();
+  var errEl = document.getElementById('geminiError');
+  errEl.style.display = 'none';
+  if(!key){ errEl.textContent='Insira sua chave de API do Gemini.'; errEl.style.display='block'; return; }
+  if(!prompt){ errEl.textContent='Descreva o que você precisa fazer.'; errEl.style.display='block'; return; }
+
+  var resultsEl = document.getElementById('geminiResults');
+  var cardList = document.getElementById('aiCardList');
+  resultsEl.classList.add('show');
+  cardList.innerHTML = '<div class="gemini-spinner">Gemini está pensando...</div>';
+  document.getElementById('generateBtn').disabled = true;
+
+  var systemPrompt = 'Você é um assistente de gestão de tarefas. O usuário vai descrever um trabalho. Gere entre 3 e 6 tarefas práticas e objetivas em formato JSON. Responda APENAS com um array JSON válido, sem texto antes ou depois, sem markdown. Cada item deve ter: "title" (string, max 60 chars), "desc" (string, max 120 chars), "tag" (string, ex: "Dev", "Design", "QA", "Bug", "Docs", "Test", "Review"). Exemplo de formato: [{"title":"...","desc":"...","tag":"Dev"}]';
+
+  var body = {
+    contents:[{parts:[{text: systemPrompt+'\n\nTarefa do usuário: '+prompt}]}],
+    generationConfig:{temperature:0.7,maxOutputTokens:1024}
+  };
+
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(key),{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  })
+  .then(function(r){
+    if(!r.ok) return r.json().then(function(e){ throw new Error(e.error&&e.error.message||'Erro '+r.status); });
+    return r.json();
+  })
+  .then(function(data){
+    document.getElementById('generateBtn').disabled = false;
+    var text = data.candidates&&data.candidates[0]&&data.candidates[0].content&&data.candidates[0].content.parts&&data.candidates[0].content.parts[0]&&data.candidates[0].content.parts[0].text||'';
+    // strip possible markdown code block
+    text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+    var tasks;
+    try{ tasks = JSON.parse(text); }
+    catch(e){ throw new Error('Resposta da IA não foi JSON válido. Tente novamente.'); }
+    renderAiCards(tasks);
+  })
+  .catch(function(err){
+    document.getElementById('generateBtn').disabled = false;
+    cardList.innerHTML='';
+    errEl.textContent = '⚠ '+err.message;
+    errEl.style.display='block';
+  });
+};
+
+function renderAiCards(tasks){
+  var cardList = document.getElementById('aiCardList');
+  cardList.innerHTML = '';
+  geminiSelectedCards = [];
+  document.getElementById('addAiCards').disabled = true;
+
+  var tagColorMap = {'Dev':'#00bcd422','Design':'#7c4dff22','QA':'#ffd74022','Bug':'#ff6b6b22','Docs':'#69f0ae22','Test':'#2196f322','Review':'#ff980022'};
+  var tagFgMap    = {'Dev':'#4dd0e1','Design':'#b39ddb','QA':'#ffe082','Bug':'#ef9a9a','Docs':'#a5d6a7','Test':'#90caf9','Review':'#ffcc80'};
+
+  tasks.forEach(function(task,i){
+    var item = document.createElement('div');
+    item.className = 'ai-card-preview';
+    var check = document.createElement('div');
+    check.className = 'ai-card-preview-check';
+    var body = document.createElement('div');
+    body.className = 'ai-card-preview-body';
+    var title = document.createElement('div');
+    title.className = 'ai-card-preview-title';
+    title.textContent = task.title;
+    var desc = document.createElement('div');
+    desc.className = 'ai-card-preview-desc';
+    desc.textContent = task.desc;
+    var tagEl = document.createElement('span');
+    tagEl.className = 'ai-card-preview-tag';
+    var tbg = tagColorMap[task.tag]||'#8890c422';
+    var tfg = tagFgMap[task.tag]||'#8890c4';
+    tagEl.style.background = tbg;
+    tagEl.style.color = tfg;
+    tagEl.textContent = task.tag||'Task';
+    body.appendChild(title); body.appendChild(desc); body.appendChild(tagEl);
+    item.appendChild(check); item.appendChild(body);
+
+    item.onclick = function(){
+      var idx = geminiSelectedCards.indexOf(i);
+      if(idx>=0){ geminiSelectedCards.splice(idx,1); item.classList.remove('selected'); check.textContent=''; }
+      else{ geminiSelectedCards.push(i); item.classList.add('selected'); check.textContent='✓'; }
+      document.getElementById('addAiCards').disabled = geminiSelectedCards.length===0;
+      document.getElementById('addAiCards').textContent = geminiSelectedCards.length>0
+        ? 'Adicionar '+geminiSelectedCards.length+' tarefa(s) ao board'
+        : 'Adicionar selecionadas ao board';
+    };
+    cardList.appendChild(item);
+
+    // auto-select all
+    item.click();
+  });
+}
+
+document.getElementById('addAiCards').onclick = function(){
+  var colId = document.getElementById('geminiColSelect').value;
+  var col = state.cols.find(function(c){ return c.id===colId; });
+  if(!col) return;
+  var cards = document.getElementById('aiCardList').querySelectorAll('.ai-card-preview');
+  var tagColorMap={'Dev':'#00bcd422','Design':'#7c4dff22','QA':'#ffd74022','Bug':'#ff6b6b22','Docs':'#69f0ae22','Test':'#2196f322','Review':'#ff980022'};
+  var tagFgMap={'Dev':'#4dd0e1','Design':'#b39ddb','QA':'#ffe082','Bug':'#ef9a9a','Docs':'#a5d6a7','Test':'#90caf9','Review':'#ffcc80'};
+
+  geminiSelectedCards.forEach(function(i){
+    var titleEl = cards[i].querySelector('.ai-card-preview-title');
+    var descEl = cards[i].querySelector('.ai-card-preview-desc');
+    var tagEl = cards[i].querySelector('.ai-card-preview-tag');
+    var tagText = tagEl ? tagEl.textContent.trim() : '';
+    col.cards.push({
+      id:uid(),
+      title: titleEl?titleEl.textContent:'Nova Tarefa',
+      desc: descEl?descEl.textContent:'',
+      tags: tagText ? [{label:tagText,bg:tagColorMap[tagText]||'#8890c422',color:tagFgMap[tagText]||'#8890c4'}] : [],
+      progress:0, avatars:[], starred:false, checks:0, comments:0
+    });
+  });
+
+  document.getElementById('geminiOverlay').classList.remove('open');
+  render();
+};
+
+// ======= RIGHT PANEL =======
 function renderRightPanel(){
   var rp = document.getElementById('rightPanel');
-  rp.innerHTML = '';
+  rp.innerHTML='';
 
-  // Profile
   var prof = document.createElement('div');
   prof.className = 'rp-profile';
   var lines = state.profile.name.split('\n');
-  var initials = (lines[0]||'?')[0] + (lines[1]||'?')[0];
-  prof.innerHTML = '<div class="rp-avatar"><div class="rp-avatar-ring"></div>'+initials+'</div>';
-  var nameEl = document.createElement('div');
-  nameEl.className = 'rp-name';
-  nameEl.contentEditable = "true";
-  nameEl.spellcheck = false;
-  nameEl.textContent = lines[0] || '';
-  nameEl.addEventListener('blur', function(){
-    var parts = state.profile.name.split('\n');
-    parts[0] = nameEl.textContent.trim();
-    state.profile.name = parts.join('\n');
-    renderRightPanel();
-  });
-  var surnameEl = document.createElement('div');
-  surnameEl.className = 'rp-name';
-  surnameEl.contentEditable = "true";
-  surnameEl.spellcheck = false;
-  surnameEl.textContent = lines[1] || '';
-  surnameEl.addEventListener('blur', function(){
-    var parts = state.profile.name.split('\n');
-    parts[1] = surnameEl.textContent.trim();
-    state.profile.name = parts.join('\n');
-    renderRightPanel();
-  });
-  var roleEl = document.createElement('div');
-  roleEl.className = 'rp-role';
-  roleEl.contentEditable = "true";
-  roleEl.spellcheck = false;
-  roleEl.textContent = state.profile.role;
-  roleEl.addEventListener('blur', function(){ state.profile.role = roleEl.textContent.trim(); });
+  var initials = (lines[0]||'?')[0]+(lines[1]||'?')[0];
+  prof.innerHTML='<div class="rp-avatar"><div class="rp-avatar-ring"></div>'+initials+'</div>';
+  var nameEl=document.createElement('div'); nameEl.className='rp-name'; nameEl.contentEditable="true"; nameEl.spellcheck=false; nameEl.textContent=lines[0]||'';
+  nameEl.addEventListener('blur',function(){ var p=state.profile.name.split('\n'); p[0]=nameEl.textContent.trim(); state.profile.name=p.join('\n'); renderRightPanel(); });
+  var surnameEl=document.createElement('div'); surnameEl.className='rp-name'; surnameEl.contentEditable="true"; surnameEl.spellcheck=false; surnameEl.textContent=lines[1]||'';
+  surnameEl.addEventListener('blur',function(){ var p=state.profile.name.split('\n'); p[1]=surnameEl.textContent.trim(); state.profile.name=p.join('\n'); renderRightPanel(); });
+  var roleEl=document.createElement('div'); roleEl.className='rp-role'; roleEl.contentEditable="true"; roleEl.spellcheck=false; roleEl.textContent=state.profile.role;
+  roleEl.addEventListener('blur',function(){ state.profile.role=roleEl.textContent.trim(); });
   prof.appendChild(nameEl); prof.appendChild(surnameEl); prof.appendChild(roleEl);
   rp.appendChild(prof);
 
-  // Completed tasks
-  var secTitle = document.createElement('div');
-  secTitle.innerHTML = '<div class="rp-section-title">Tarefas Concluídas</div>';
-  rp.appendChild(secTitle);
-  var statsGrid = document.createElement('div');
-  statsGrid.className = 'stats-grid';
-  state.stats.forEach(function(s, si){
-    var box = document.createElement('div');
-    box.className = 'stat-box';
-    var num = document.createElement('div');
-    num.className = 'stat-num';
-    num.style.color = s.color;
-    num.contentEditable = "true";
-    num.spellcheck = false;
-    num.textContent = s.num;
-    num.addEventListener('blur', function(){ s.num = parseInt(num.textContent)||0; });
-    var lbl = document.createElement('div');
-    lbl.className = 'stat-name';
-    lbl.contentEditable = "true";
-    lbl.spellcheck = false;
-    lbl.textContent = s.label;
-    lbl.addEventListener('blur', function(){ s.label = lbl.textContent.trim(); });
-    box.appendChild(num); box.appendChild(lbl);
-    statsGrid.appendChild(box);
+  var secTitle=document.createElement('div'); secTitle.innerHTML='<div class="rp-section-title">Tarefas Concluídas</div>'; rp.appendChild(secTitle);
+  var statsGrid=document.createElement('div'); statsGrid.className='stats-grid';
+  state.stats.forEach(function(s){
+    var box=document.createElement('div'); box.className='stat-box';
+    var num=document.createElement('div'); num.className='stat-num'; num.style.color=s.color; num.contentEditable="true"; num.spellcheck=false; num.textContent=s.num;
+    num.addEventListener('blur',function(){ s.num=parseInt(num.textContent)||0; });
+    var lbl=document.createElement('div'); lbl.className='stat-name'; lbl.contentEditable="true"; lbl.spellcheck=false; lbl.textContent=s.label;
+    lbl.addEventListener('blur',function(){ s.label=lbl.textContent.trim(); });
+    box.appendChild(num); box.appendChild(lbl); statsGrid.appendChild(box);
   });
   rp.appendChild(statsGrid);
 
-  // Efficiency
-  var effTitle = document.createElement('div');
-  effTitle.innerHTML = '<div class="rp-section-title" style="margin-top:4px">Eficiência</div>';
-  rp.appendChild(effTitle);
-  var effGrid = document.createElement('div');
-  effGrid.className = 'efficiency-grid';
-  state.efficiency.forEach(function(e, ei){
-    var box = document.createElement('div');
-    box.className = 'eff-box';
-    var r = 16, circ = 2*Math.PI*r;
-    var offset = circ * (1 - e.pct/100);
-    var ring = document.createElement('div');
-    ring.className = 'eff-ring';
-    ring.innerHTML = '<svg viewBox="0 0 40 40" width="44" height="44">'
-      +'<circle class="bg" cx="20" cy="20" r="'+r+'"/>'
-      +'<circle class="fill" cx="20" cy="20" r="'+r+'" stroke="'+e.color+'" stroke-dasharray="'+circ+'" stroke-dashoffset="'+offset+'"/>'
-      +'</svg><div class="eff-pct" style="color:'+e.color+'">'+e.pct+'%</div>';
-    ring.title = "Clique para editar";
-    ring.style.cursor = "pointer";
-    ring.onclick = function(){
-      var v = prompt("Eficiência (0-100):", e.pct);
-      if(v===null) return;
-      e.pct = Math.max(0,Math.min(100,parseInt(v)||0));
-      renderRightPanel();
-    };
-    var lbl = document.createElement('div');
-    lbl.className = 'eff-name';
-    lbl.contentEditable = "true";
-    lbl.spellcheck = false;
-    lbl.textContent = e.label;
-    lbl.addEventListener('blur', function(){ e.label = lbl.textContent.trim(); });
-    box.appendChild(ring); box.appendChild(lbl);
-    effGrid.appendChild(box);
+  var effTitle=document.createElement('div'); effTitle.innerHTML='<div class="rp-section-title" style="margin-top:4px">Eficiência</div>'; rp.appendChild(effTitle);
+  var effGrid=document.createElement('div'); effGrid.className='efficiency-grid';
+  state.efficiency.forEach(function(e){
+    var box=document.createElement('div'); box.className='eff-box';
+    var r=16,circ=2*Math.PI*r,offset=circ*(1-e.pct/100);
+    var ring=document.createElement('div'); ring.className='eff-ring';
+    ring.innerHTML='<svg viewBox="0 0 40 40" width="44" height="44"><circle class="bg" cx="20" cy="20" r="'+r+'"/><circle class="fill" cx="20" cy="20" r="'+r+'" stroke="'+e.color+'" stroke-dasharray="'+circ+'" stroke-dashoffset="'+offset+'"/></svg><div class="eff-pct" style="color:'+e.color+'">'+e.pct+'%</div>';
+    ring.style.cursor="pointer"; ring.title="Clique para editar";
+    ring.onclick=function(){ var v=prompt("Eficiência (0-100):",e.pct); if(v===null)return; e.pct=Math.max(0,Math.min(100,parseInt(v)||0)); renderRightPanel(); };
+    var lbl=document.createElement('div'); lbl.className='eff-name'; lbl.contentEditable="true"; lbl.spellcheck=false; lbl.textContent=e.label;
+    lbl.addEventListener('blur',function(){ e.label=lbl.textContent.trim(); });
+    box.appendChild(ring); box.appendChild(lbl); effGrid.appendChild(box);
   });
   rp.appendChild(effGrid);
 
-  // Plan
-  var planTitle = document.createElement('div');
-  planTitle.innerHTML = '<div class="rp-section-title" style="margin-top:4px">Plano</div>';
-  rp.appendChild(planTitle);
-  var planList = document.createElement('div');
-  planList.className = 'plan-list';
-  state.plan.forEach(function(p, pi){
-    var item = document.createElement('div');
-    item.className = 'plan-item';
-    var dot = document.createElement('div');
-    dot.className = 'plan-dot';
-    dot.style.background = p.color;
-    var time = document.createElement('div');
-    time.className = 'plan-time';
-    time.contentEditable = "true";
-    time.spellcheck = false;
-    time.textContent = p.time;
-    time.addEventListener('blur', function(){ p.time = time.textContent.trim(); });
-    var text = document.createElement('div');
-    text.className = 'plan-text';
-    text.contentEditable = "true";
-    text.spellcheck = false;
-    text.textContent = p.text;
-    text.addEventListener('blur', function(){ p.text = text.textContent.trim(); });
+  var planTitle=document.createElement('div'); planTitle.innerHTML='<div class="rp-section-title" style="margin-top:4px">Plano</div>'; rp.appendChild(planTitle);
+  var planList=document.createElement('div'); planList.className='plan-list';
+  state.plan.forEach(function(p,pi){
+    var item=document.createElement('div'); item.className='plan-item';
+    var dot=document.createElement('div'); dot.className='plan-dot'; dot.style.background=p.color;
+    var time=document.createElement('div'); time.className='plan-time'; time.contentEditable="true"; time.spellcheck=false; time.textContent=p.time;
+    time.addEventListener('blur',function(){ p.time=time.textContent.trim(); });
+    var text=document.createElement('div'); text.className='plan-text'; text.contentEditable="true"; text.spellcheck=false; text.textContent=p.text;
+    text.addEventListener('blur',function(){ p.text=text.textContent.trim(); });
     item.appendChild(dot); item.appendChild(time); item.appendChild(text);
-    item.addEventListener('dblclick', function(){
-      if(confirm("Remover este item do plano?")){ state.plan.splice(pi,1); renderRightPanel(); }
-    });
+    item.addEventListener('dblclick',function(){ if(confirm("Remover este item?")){ state.plan.splice(pi,1); renderRightPanel(); } });
     planList.appendChild(item);
   });
-  var planAdd = document.createElement('div');
-  planAdd.className = 'plan-add';
-  planAdd.textContent = '+ Adicionar horário';
-  planAdd.onclick = function(){
-    state.plan.push({time:"00:00 - 00:00", text:"Novo item", color: AVATAR_COLORS[state.plan.length % AVATAR_COLORS.length]});
-    renderRightPanel();
-  };
+  var planAdd=document.createElement('div'); planAdd.className='plan-add'; planAdd.textContent='+ Adicionar horário';
+  planAdd.onclick=function(){ state.plan.push({time:"00:00 - 00:00",text:"Novo item",color:AVATAR_COLORS[state.plan.length%AVATAR_COLORS.length]}); renderRightPanel(); };
   planList.appendChild(planAdd);
   rp.appendChild(planList);
 }
