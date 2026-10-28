@@ -1121,7 +1121,10 @@ function renderRightPanel(){
   prof.className = 'rp-profile';
   var lines = state.profile.name.split('\n');
   var initials = (lines[0]||'?')[0]+(lines[1]||'?')[0];
-  prof.innerHTML='<div class="rp-avatar"><div class="rp-avatar-ring"></div>'+initials+'</div>';
+  var avatar=document.createElement('div'); avatar.className='rp-avatar';
+  var ringEl=document.createElement('div'); ringEl.className='rp-avatar-ring';
+  avatar.appendChild(ringEl); avatar.appendChild(document.createTextNode(initials));
+  prof.appendChild(avatar);
   var nameEl=document.createElement('div'); nameEl.className='rp-name'; nameEl.contentEditable="true"; nameEl.spellcheck=false; nameEl.textContent=lines[0]||'';
   nameEl.addEventListener('blur',function(){ var p=state.profile.name.split('\n'); p[0]=nameEl.textContent.trim(); state.profile.name=p.join('\n'); renderRightPanel(); });
   var surnameEl=document.createElement('div'); surnameEl.className='rp-name'; surnameEl.contentEditable="true"; surnameEl.spellcheck=false; surnameEl.textContent=lines[1]||'';
