@@ -1010,9 +1010,9 @@ document.getElementById('generateBtn').onclick = function(){
     generationConfig:{temperature:0.7,maxOutputTokens:1024}
   };
 
-  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(key),{
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','x-goog-api-key':key},
     body:JSON.stringify(body)
   })
   .then(function(r){
@@ -1027,6 +1027,7 @@ document.getElementById('generateBtn').onclick = function(){
     var tasks;
     try{ tasks = JSON.parse(text); }
     catch(e){ throw new Error('Resposta da IA não foi JSON válido. Tente novamente.'); }
+    if(!Array.isArray(tasks)) throw new Error('Resposta da IA em formato inesperado. Tente novamente.');
     renderAiCards(tasks);
   })
   .catch(function(err){

@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "FuryMCP": {
+      "type": "http",
+      "url": "${FURY_MCP_URL}"
+    },
+    "JIRA-LOCAL": {
+      "type": "http",
+      "url": "${JIRA_LOCAL_MCP_URL}"
+    },
+    "ApplicationSecurityMCP": {
+      "type": "http",
+      "url": "${APPSEC_MCP_URL}"
+    },
+    "LargeTestingPlatformMCP": {
+      "type": "http",
+      "url": "${LTP_MCP_URL}"
+    }
+  }
+}
