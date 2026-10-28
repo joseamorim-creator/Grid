@@ -1,20 +1,24 @@
 {
   "mcpServers": {
     "FuryMCP": {
-      "type": "http",
-      "url": "${FURY_MCP_URL}"
-    },
-    "JIRA-LOCAL": {
-      "type": "http",
-      "url": "${JIRA_LOCAL_MCP_URL}"
+      "command": "mcp-remote-proxy",
+      "args": ["https://mcp.melioffice.com/namespaces/backend/mcp", "--transport", "http"]
     },
     "ApplicationSecurityMCP": {
-      "type": "http",
-      "url": "${APPSEC_MCP_URL}"
+      "command": "mcp-remote-proxy",
+      "args": ["https://codeguard-mcp.melioffice.com/mcp", "--transport", "http"]
     },
     "LargeTestingPlatformMCP": {
+      "command": "mcp-remote-proxy",
+      "args": ["https://ltp-mcp.melioffice.com/mcp", "--transport", "http"]
+    },
+    "CodeReviewerMCP": {
+      "command": "mcp-remote-proxy",
+      "args": ["https://genai-code-review-mcp.melioffice.com/mcp", "--transport", "http"]
+    },
+    "AtlassianMCP": {
       "type": "http",
-      "url": "${LTP_MCP_URL}"
+      "url": "https://mcp.atlassian.com/v1/mcp"
     }
   }
 }

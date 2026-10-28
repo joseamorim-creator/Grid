@@ -49,6 +49,21 @@ bloqueia escritas contendo segredos aparentes e arquivos `.py` com erro de sinta
 
 ## MCPs
 
-`.mcp.json` declara FuryMCP, JIRA-LOCAL, ApplicationSecurityMCP e LargeTestingPlatformMCP.
-As URLs vêm de variáveis de ambiente (`FURY_MCP_URL`, `JIRA_LOCAL_MCP_URL`,
-`APPSEC_MCP_URL`, `LTP_MCP_URL`); configure-as no seu ambiente antes de usar.
+`.mcp.json` usa as URLs oficiais (as mesmas do `meli-sdd-kit`). Os servidores `*.melioffice.com`
+passam pelo `mcp-remote-proxy`, que injeta o Tiger Token automaticamente — exige VPN e
+`mcp-remote-proxy` >= 0.6.0 instalado na máquina.
+
+| Servidor | Uso | URL |
+|---|---|---|
+| `FuryMCP` | buscar serviços/APIs existentes (`fury__search_api_specs`, `fury__search_api_docs`) | `https://mcp.melioffice.com/namespaces/backend/mcp` |
+| `ApplicationSecurityMCP` | validar regras de segurança antes de entregar | `https://codeguard-mcp.melioffice.com/mcp` |
+| `LargeTestingPlatformMCP` | gerar e rodar testes LTP | `https://ltp-mcp.melioffice.com/mcp` |
+| `CodeReviewerMCP` | code review GenAI (usado pelo `meli-pre-merge-review`) | `https://genai-code-review-mcp.melioffice.com/mcp` |
+| `AtlassianMCP` | tickets e transições de status no Jira (OAuth da Atlassian) | `https://mcp.atlassian.com/v1/mcp` |
+
+Se o seu time usa um MCP de Jira local (`jira-local`), ele é configurado por usuário, com
+credenciais próprias, e não entra neste arquivo.
+
+Skills `/meli.*`, `fury-services-architect` e `meli-security-expert` vêm do pacote
+`meli-sdd-kit` (repo `melisource/fury_meli-sdd-kit`); snippets de SDKs Fury vêm do plugin
+`fury-services` do marketplace `melisource/fury_meli-claude-marketplace`.
