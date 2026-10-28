@@ -12,7 +12,7 @@ Guia para o Claude Code neste repositório, seguindo o arquétipo **Backend Deve
 
 Toda funcionalidade nova segue o ciclo completo, sem pular etapas:
 
-1. `/meli.start` — abre a feature (e o ticket no JIRA-LOCAL).
+1. `/meli.start` — abre a feature (e o ticket no Jira).
 2. `/meli.spec` — spec funcional **e** técnica. **Nunca** rodar `/meli.build` sem spec.
 3. `/meli.plan` — plano de implementação.
 4. `/meli.build` — implementação, com testes LTP gerados junto.
@@ -27,7 +27,7 @@ Para features complexas, consultar `meli-sdd-kit-expert` antes da spec.
   (`fury__search_api_specs`, `fury__search_api_docs`) e consultar `fury-services-architect`.
 - Integrações com SDKs Fury (KVS, BigQueue, clientes HTTP) seguem os padrões do `fury-snippets-expert`.
   Não escrever cliente HTTP "na mão" quando existir um padrão Fury.
-- Tickets e transições de status pelo JIRA-LOCAL.
+- Tickets e transições de status pelo MCP de Jira (`AtlassianMCP` ou `jira-local`).
 - Todo endpoint novo precisa de testes LTP (LargeTestingPlatformMCP).
 
 ## Segurança
