@@ -1,14 +1,23 @@
 {
+  "extraKnownMarketplaces": {
+    "meli-claude-marketplace": {
+      "source": { "source": "github", "repo": "melisource/fury_meli-claude-marketplace" }
+    }
+  },
+  "enabledPlugins": {
+    "fury-services@meli-claude-marketplace": true,
+    "meli-pre-merge-review@meli-claude-marketplace": true,
+    "jira-sdd-sync@meli-claude-marketplace": true
+  },
+  "enabledMcpjsonServers": ["FuryMCP", "ApplicationSecurityMCP", "LargeTestingPlatformMCP", "CodeReviewerMCP", "AtlassianMCP"],
+  "permissions": {
+    "allow": ["mcp__FuryMCP__*", "mcp__ApplicationSecurityMCP__*", "mcp__LargeTestingPlatformMCP__*", "mcp__CodeReviewerMCP__*"]
+  },
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre_write_scan.py\""
-          }
-        ]
+        "hooks": [{ "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre_write_scan.py\"" }]
       }
     ]
   }
